@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PII Detection Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-animation">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <h1><i class="fas fa-shield-alt"></i> PII Detection Dashboard</h1>
+        <p>Secure detection and de-identification of sensitive information</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="section-header">
+        <h2><i class="fas fa-upload"></i> Upload File</h2>
+        <p>Select your file to scan for PII and generate de-identified version</p>
+      </div>
+
+      <form id="uploadForm" class="upload-form">
+        <div class="file-upload-container">
+          <input type="file" id="fileInput" class="file-input" accept=".csv,.xls,.xlsx,.json,.txt,.pdf">
+          <label for="fileInput" class="file-label">
+            <i class="fas fa-file-upload"></i> Choose File
+          </label>
+          <div id="fileSelected" class="file-selected"></div>
+        </div>
+
+        <div class="upload-options">
+          <div class="option">
+            <label for="confidenceThreshold"><i class="fas fa-sliders-h"></i> Confidence Threshold</label>
+            <input type="range" id="confidenceThreshold" min="0.1" max="1.0" step="0.1" value="0.7">
+            <span class="threshold-value">0.7</span>
+          </div>
+          <div class="option">
+            <label for="alertEmail"><i class="fas fa-envelope"></i> Alert Email (Optional)</label>
+            <input type="email" id="alertEmail" placeholder="Enter email for high-risk alerts">
+          </div>
+        </div>
+
+        <button type="submit" id="processBtn" class="process-btn">
+          <i class="fas fa-cog"></i> Process File
+        </button>
+      </form>
+    </section>
+
+    <section id="loadingSection" class="card loading">
+      <div class="spinner"></div>
+      <p>Processing your file...</p>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </section>
+
+    <section id="resultsSection" class="card results-section">
+      <div class="section-header">
+        <h2><i class="fas fa-chart-bar"></i> Detection Overview</h2>
+        <p>Summary of PII detections and processing results</p>
+      </div>
+
+      <div id="statsGrid" class="stats-grid"></div>
+
+      <div class="results-grid">
+        <div class="chart-section">
+          <h3><i class="fas fa-chart-bar"></i> PII Types Detected</h3>
+          <div class="chart-container">
+            <canvas id="piiChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-section">
+          <h3><i class="fas fa-chart-pie"></i> Detection Distribution</h3>
+          <div class="chart-container">
+            <canvas id="distributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2><i class="fas fa-info-circle"></i> Processing Details</h2>
+        <p>Detailed results and metrics from the PII detection process</p>
+      </div>
+
+      <div class="details-tabs">
+        <button class="tab-btn active" data-target="summaryTab">Summary</button>
+        <button class="tab-btn" data-target="detectionsTab">Detections</button>
+        <button class="tab-btn" data-target="metricsTab">Metrics</button>
+      </div>
+
+      <div id="summaryTab" class="tab-content active">
+        <pre id="summaryDetails" class="summary-details"></pre>
+      </div>
+
+      <div id="detectionsTab" class="tab-content">
+        <div class="detections-table-container">
+          <table class="detections-table">
+            <thead>
+              <tr>
+                <th>Row</th>
+                <th>Column</th>
+                <th>Type</th>
+                <th>Original</th>
+                <th>Masked</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="detectionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="metricsTab" class="tab-content">
+        <div id="metricsGrid" class="metrics-grid"></div>
+      </div>
+
+      <div class="section-header">
+        <h2><i class="fas fa-download"></i> Download Results</h2>
+        <p>Get your processed files and detailed reports</p>
+      </div>
+
+      <div class="download-grid">
+        <div class="download-item">
+          <div class="download-icon"><i class="fas fa-file-csv"></i></div>
+          <h4>De-identified File</h4>
+          <p>Original data with PII masked/anonymized</p>
+          <button class="download-btn" data-filetype="deidentified">Download</button>
+        </div>
+        <div class="download-item">
+          <div class="download-icon"><i class="fas fa-file-alt"></i></div>
+          <h4>Detections Report</h4>
+          <p>Detailed list of all PII detections</p>
+          <button class="download-btn" data-filetype="detections">Download</button>
+        </div>
+        <div class="download-item">
+          <div class="download-icon"><i class="fas fa-file-alt"></i></div>
+          <h4>Summary Report</h4>
+          <p>Complete processing summary and metrics</p>
+          <button class="download-btn" data-filetype="summary">Download</button>
+        </div>
+        <div class="download-item">
+          <div class="download-icon"><i class="fas fa-file-pdf"></i></div>
+          <h4>Visual Report</h4>
+          <p>Graphical analysis of PII detections</p>
+          <button class="download-btn" data-filetype="visual_report">Download</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast-container"></div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 PII Detection Dashboard | Built for Hackathon Activity 6</p>
+      <div class="footer-links">
+        <a href="#"><i class="fab fa-github"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+        <a href="#"><i class="fas fa-envelope"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
